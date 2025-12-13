@@ -11,7 +11,7 @@ const initialNfts: RoomAvailability[] = [
   {
     id: 'nft-1',
     hotel_name: 'The Grand Iotan',
-    date: 20250815,
+    date: 20270815,
     room_type: 'Deluxe',
     price: 150000000,
     capacity: 2,
@@ -22,7 +22,7 @@ const initialNfts: RoomAvailability[] = [
   {
     id: 'nft-2',
     hotel_name: 'The Grand Iotan',
-    date: 20250816,
+    date: 20270816,
     room_type: 'Suite',
     price: 300000000,
     capacity: 4,
@@ -33,7 +33,7 @@ const initialNfts: RoomAvailability[] = [
   {
     id: 'nft-3',
     hotel_name: 'Seaside Shimmers',
-    date: 20250901,
+    date: 20270901,
     room_type: 'Standard',
     price: 100000000,
     capacity: 2,
@@ -44,7 +44,7 @@ const initialNfts: RoomAvailability[] = [
   {
     id: 'nft-4',
     hotel_name: 'Seaside Shimmers',
-    date: 20250901,
+    date: 20270901,
     room_type: 'Family',
     price: 220000000,
     capacity: 4,
