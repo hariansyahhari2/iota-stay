@@ -20,7 +20,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import PlaceHolderImagesData from '@/lib/placeholder-images.json';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
@@ -149,7 +149,7 @@ export default function MintRoomForm() {
                         <SelectValue placeholder="Or select a placeholder image" />
                     </SelectTrigger>
                     <SelectContent>
-                        {PlaceHolderImages.map(img => (
+                        {PlaceHolderImagesData.placeholderImages.map(img => (
                             <SelectItem key={img.id} value={img.imageUrl}>{img.description}</SelectItem>
                         ))}
                     </SelectContent>
