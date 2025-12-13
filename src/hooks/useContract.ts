@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import {
   useCurrentAccount,
   useIotaClient,
@@ -8,7 +8,7 @@ import {
   useIotaClientQuery,
 } from "@iota/dapp-kit"
 import { Transaction } from "@iota/iota-sdk/transactions"
-import type { IotaObjectData } from "@iota/iota-sdk/client"
+import type { IotaObjectData, IOutputResponse } from "@iota/iota-sdk/client"
 import { TESTNET_PACKAGE_ID } from "@/lib/config"
 import type { RoomAvailability } from "@/lib/types"
 
@@ -87,34 +87,50 @@ export const useContract = () => {
   const address = currentAccount?.address
   const iotaClient = useIotaClient()
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction()
-  const [objectId, setObjectId] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [transactionIsLoading, setTransactionIsLoading] = useState(false)
   const [hash, setHash] = useState<string | undefined>()
   const [transactionError, setTransactionError] = useState<Error | null>(null)
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hash = window.location.hash.slice(1)
-      if (hash) setObjectId(hash)
-    }
-  }, [])
-
-  const { data, isPending: isFetching, error: queryError, refetch } = useIotaClientQuery(
-    "getObject",
+  const { data: objectIdResponse, isPending: isFetchingObjectIds, error: queryError, refetch } = useIotaClientQuery(
+    "indexer",
     {
-      id: objectId!,
-      options: { showContent: true, showOwner: true },
+      method: "nftOutputIds",
+      methodParams: [{ address: address }],
     },
     {
-      enabled: !!objectId,
+      enabled: !!address,
     }
-  )
+  );
+  
+  const objectIds = useMemo(() => {
+    return objectIdResponse?.items || [];
+  }, [objectIdResponse]);
 
-  const fields = data?.data ? getObjectFields(data.data) : null
-  const isOwner = fields?.owner.toLowerCase() === address?.toLowerCase()
+  const { data: objects, isPending: isFetchingObjects } = useIotaClientQuery(
+    "getOutputs",
+    {
+      outputIds: objectIds
+    },
+    {
+      enabled: objectIds.length > 0,
+    }
+  );
 
-  const objectExists = !!data?.data
-  const hasValidData = !!fields
+  const contractData: RoomAvailability[] | null = useMemo(() => {
+    if (!objects?.outputs) return [];
+    
+    return objects.outputs.map((output: IOutputResponse) => {
+      const iotaObjectData = output.output as unknown as IotaObjectData;
+      const fields = getObjectFields(iotaObjectData);
+      return {
+        id: output.metadata.outputId,
+        ...fields
+      } as RoomAvailability
+    }).filter(Boolean);
+  }, [objects]);
+  
+  const objectExists = useMemo(() => contractData && contractData.length > 0, [contractData]);
+
 
   const mintRoom = async (
     hotel_name: string,
@@ -126,7 +142,7 @@ export const useContract = () => {
     image_hash: string
   ) => {
     try {
-      setIsLoading(true)
+      setTransactionIsLoading(true)
       setTransactionError(null)
       setHash(undefined)
       const tx = new Transaction()
@@ -138,7 +154,7 @@ export const useContract = () => {
           tx.pure.u64(price),
           tx.pure.u8(capacity),
           tx.pure.string(image_url),
-          tx.pure.string(image_hash), // Assuming image_hash is a string for simplicity
+          tx.pure.string(image_hash), // Smart contract expects vector<u8> but SDK might handle string conversion
         ],
         target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
       })
@@ -149,28 +165,19 @@ export const useContract = () => {
           onSuccess: async ({ digest }) => {
             setHash(digest)
             try {
-              const { effects } = await iotaClient.waitForTransaction({
-                digest,
-                options: { showEffects: true },
-              })
-              const newObjectId = effects?.created?.[0]?.reference?.objectId
-              if (newObjectId) {
-                setObjectId(newObjectId)
-                if (typeof window !== "undefined") {
-                  window.location.hash = newObjectId
-                }
-              }
-              setIsLoading(false)
+              await iotaClient.waitForTransaction({ digest });
+              refetch();
             } catch (waitError) {
               console.error("Error waiting for transaction:", waitError)
-              setIsLoading(false)
+            } finally {
+              setTransactionIsLoading(false);
             }
           },
           onError: (err) => {
             const error = err instanceof Error ? err : new Error(String(err))
             setTransactionError(error)
             console.error("Error:", err)
-            setIsLoading(false)
+            setTransactionIsLoading(false)
           },
         }
       )
@@ -178,13 +185,13 @@ export const useContract = () => {
       const error = err instanceof Error ? err : new Error(String(err))
       setTransactionError(error)
       console.error("Error minting room:", err)
-      setIsLoading(false)
+      setTransactionIsLoading(false)
     }
   }
 
   const bookRoom = async (room: RoomAvailability) => {
     try {
-      setIsLoading(true)
+      setTransactionIsLoading(true)
       setTransactionError(null)
       setHash(undefined)
       const tx = new Transaction()
@@ -206,13 +213,13 @@ export const useContract = () => {
             } catch (waitError) {
                 console.error("Error waiting for transaction:", waitError);
             }
-            setIsLoading(false);
+            setTransactionIsLoading(false);
           },
           onError: (err) => {
             const error = err instanceof Error ? err : new Error(String(err))
             setTransactionError(error)
             console.error("Error:", err)
-            setIsLoading(false)
+            setTransactionIsLoading(false)
           },
         }
       )
@@ -220,24 +227,13 @@ export const useContract = () => {
       const error = err instanceof Error ? err : new Error(String(err))
       setTransactionError(error)
       console.error("Error booking room:", err)
-      setIsLoading(false)
+      setTransactionIsLoading(false)
     }
   }
 
-
-  const contractData: RoomAvailability | null = fields && objectId
-    ? {
-      id: objectId,
-      ...fields,
-    }
-    : null
-
   const clearObject = () => {
-    setObjectId(null)
+    // This function might need rethinking in a multi-object world
     setTransactionError(null)
-    if (typeof window !== "undefined") {
-      window.location.hash = ""
-    }
   }
 
   const actions: ContractActions = {
@@ -247,10 +243,10 @@ export const useContract = () => {
   }
 
   const contractState: ContractState = {
-    isLoading: (isLoading && !objectId) || isPending || isFetching,
+    isLoading: transactionIsLoading || isPending || isFetchingObjectIds || isFetchingObjects,
     isPending,
-    isConfirming: false, // This needs more logic to implement properly
-    isConfirmed: !!hash && !isLoading && !isPending,
+    isConfirming: isPending,
+    isConfirmed: !!hash && !isPending && !transactionIsLoading,
     hash,
     error: queryError || transactionError,
   }
@@ -259,10 +255,7 @@ export const useContract = () => {
     data: contractData,
     actions,
     state: contractState,
-    objectId,
-    isOwner,
     objectExists,
-    hasValidData,
     refetch
   }
 }

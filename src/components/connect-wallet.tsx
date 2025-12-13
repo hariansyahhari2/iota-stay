@@ -4,9 +4,11 @@ import { useIota } from '@/lib/iota';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building, User, Wallet } from 'lucide-react';
+import { useConnectWallet } from '@iota/dapp-kit';
 
 export default function ConnectWallet() {
   const { connect } = useIota();
+  const { isConnecting } = useConnectWallet();
 
   return (
     <div className="flex-1 flex items-center justify-center bg-grid-slate-50 dark:bg-grid-slate-900 p-4">
@@ -23,17 +25,19 @@ export default function ConnectWallet() {
           <Button
             className="w-full h-12 text-base bg-primary hover:bg-primary/90"
             onClick={() => connect('owner')}
+            disabled={isConnecting}
           >
             <Building className="mr-2 h-5 w-5" />
-            Connect as Hotel Owner
+            {isConnecting ? 'Connecting...' : 'Connect as Hotel Owner'}
           </Button>
           <Button
             variant="secondary"
             className="w-full h-12 text-base"
             onClick={() => connect('visitor')}
+            disabled={isConnecting}
           >
             <User className="mr-2 h-5 w-5" />
-            Connect as Visitor
+            {isConnecting ? 'Connecting...' : 'Connect as Visitor'}
           </Button>
         </CardContent>
       </Card>

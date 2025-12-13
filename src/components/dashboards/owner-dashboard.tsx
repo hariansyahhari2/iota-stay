@@ -1,18 +1,27 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useIota } from '@/lib/iota';
 import RoomCard from '@/components/room-card';
 import MintRoomForm from '@/components/mint-room-form';
 import UpdateImageDialog from '@/components/update-image-dialog';
 import type { RoomAvailability } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useContract } from '@/hooks/useContract';
 
 export default function OwnerDashboard() {
-  const { nfts, wallet } = useIota();
+  const { nfts: contextNfts, wallet, refetchNfts } = useIota();
+  const { data: contractNfts, state } = useContract();
   const [selectedRoom, setSelectedRoom] = useState<RoomAvailability | null>(null);
 
+  useEffect(() => {
+    refetchNfts();
+  }, [refetchNfts]);
+  
+  const nfts = contractNfts || contextNfts;
+
   const myNfts = useMemo(() => {
-    return nfts.filter(nft => nft.owner === wallet);
+    if (!wallet || !nfts) return [];
+    return nfts.filter(nft => nft.owner?.toLowerCase() === wallet.toLowerCase());
   }, [nfts, wallet]);
 
   const handleUpdateImage = (room: RoomAvailability) => {
@@ -32,7 +41,7 @@ export default function OwnerDashboard() {
           <TabsTrigger value="mint">Mint Room</TabsTrigger>
         </TabsList>
         <TabsContent value="listings" className="mt-6">
-          {myNfts.length > 0 ? (
+          {state.isLoading ? <p>Loading listings...</p> : myNfts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {myNfts.map(room => (
                 <RoomCard key={room.id} room={room} onUpdateImage={handleUpdateImage} />

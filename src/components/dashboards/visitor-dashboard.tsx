@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useIota } from '@/lib/iota';
 import RoomCard from '@/components/room-card';
 import { Button } from '@/components/ui/button';
@@ -13,9 +13,18 @@ import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DateRange } from 'react-day-picker';
 import { addDays } from 'date-fns';
+import { useContract } from '@/hooks/useContract';
 
 export default function VisitorDashboard() {
-  const { nfts, wallet } = useIota();
+  const { nfts: contextNfts, wallet, refetchNfts } = useIota();
+  const { data: contractNfts, state } = useContract();
+
+  useEffect(() => {
+    refetchNfts();
+  }, [refetchNfts]);
+  
+  const nfts = contractNfts || contextNfts;
+
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 7),
@@ -27,14 +36,16 @@ export default function VisitorDashboard() {
   const handleUpdateImage = () => {};
 
   const availableNfts = useMemo(() => {
+    if (!nfts) return [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayNum = parseInt(format(today, 'yyyyMMdd'));
-    return nfts.filter(nft => nft.owner !== wallet && nft.date >= todayNum);
+    return nfts.filter(nft => nft.owner?.toLowerCase() !== wallet?.toLowerCase() && nft.date >= todayNum);
   }, [nfts, wallet]);
   
   const myBookings = useMemo(() => {
-    return nfts.filter(nft => nft.owner === wallet);
+    if (!nfts || !wallet) return [];
+    return nfts.filter(nft => nft.owner?.toLowerCase() === wallet.toLowerCase());
   }, [nfts, wallet]);
 
   const { upcomingBookings, pastBookings } = useMemo(() => {
@@ -132,8 +143,7 @@ export default function VisitorDashboard() {
               />
             </div>
           </div>
-
-          {filteredNfts.length > 0 ? (
+          {state.isLoading ? <p>Loading rooms...</p> : filteredNfts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredNfts.map(room => (
                 <RoomCard key={room.id} room={room} onUpdateImage={handleUpdateImage} />
@@ -149,7 +159,7 @@ export default function VisitorDashboard() {
         <TabsContent value="bookings" className="mt-6 space-y-8">
            <div>
             <h2 className="text-2xl font-headline font-bold mb-4">Upcoming Bookings</h2>
-            {upcomingBookings.length > 0 ? (
+            {state.isLoading ? <p>Loading bookings...</p> : upcomingBookings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {upcomingBookings.map(room => (
                   <RoomCard key={room.id} room={room} onUpdateImage={handleUpdateImage} />
@@ -164,7 +174,7 @@ export default function VisitorDashboard() {
           </div>
           <div>
             <h2 className="text-2xl font-headline font-bold mb-4">Past Bookings</h2>
-            {pastBookings.length > 0 ? (
+             {state.isLoading ? <p>Loading bookings...</p> : pastBookings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {pastBookings.map(room => (
                   <RoomCard key={room.id} room={room} onUpdateImage={handleUpdateImage} />
