@@ -7,8 +7,8 @@ import {
   useSignAndExecuteTransaction,
   useIotaClientQuery,
 } from "@iota/dapp-kit"
-import { Transaction } from "@iota/iota-sdk/transactions"
-import type { IotaObjectData, IOutputResponse } from "@iota/iota-sdk/client"
+import { Transaction } from "@iota/sdk"
+import type { IotaObjectData, IOutputResponse } from "@iota/sdk"
 import { TESTNET_PACKAGE_ID } from "@/lib/config"
 import type { RoomAvailability } from "@/lib/types"
 
@@ -92,11 +92,8 @@ export const useContract = () => {
   const [transactionError, setTransactionError] = useState<Error | null>(null)
 
   const { data: objectIdResponse, isPending: isFetchingObjectIds, error: queryError, refetch } = useIotaClientQuery(
-    "indexer",
-    {
-      method: "nftOutputIds",
-      methodParams: [{ address: address }],
-    },
+    "nftOutputIds",
+    [{ address: address }],
     {
       enabled: !!address,
     }
@@ -108,9 +105,7 @@ export const useContract = () => {
 
   const { data: objects, isPending: isFetchingObjects } = useIotaClientQuery(
     "getOutputs",
-    {
-      outputIds: objectIds
-    },
+    [objectIds],
     {
       enabled: objectIds.length > 0,
     }
@@ -147,6 +142,7 @@ export const useContract = () => {
       setHash(undefined)
       const tx = new Transaction()
       tx.moveCall({
+        function: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
         arguments: [
           tx.pure.string(hotel_name),
           tx.pure.u64(date),
@@ -154,9 +150,8 @@ export const useContract = () => {
           tx.pure.u64(price),
           tx.pure.u8(capacity),
           tx.pure.string(image_url),
-          tx.pure.string(image_hash), // Smart contract expects vector<u8> but SDK might handle string conversion
+          tx.pure.string(image_hash),
         ],
-        target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
       })
 
       signAndExecute(
@@ -165,7 +160,7 @@ export const useContract = () => {
           onSuccess: async ({ digest }) => {
             setHash(digest)
             try {
-              await iotaClient.waitForTransaction({ digest });
+              await iotaClient.awaitTransaction(digest);
               refetch();
             } catch (waitError) {
               console.error("Error waiting for transaction:", waitError)
@@ -196,10 +191,10 @@ export const useContract = () => {
       setHash(undefined)
       const tx = new Transaction()
       tx.moveCall({
+        function: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.BOOK_ROOM}`,
         arguments: [
             tx.pure.object(room.id)
         ],
-        target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.BOOK_ROOM}`,
       })
 
       signAndExecute(
@@ -208,7 +203,7 @@ export const useContract = () => {
           onSuccess: async ({ digest }) => {
             setHash(digest)
              try {
-                await iotaClient.waitForTransaction({ digest });
+                await iotaClient.awaitTransaction(digest);
                 refetch();
             } catch (waitError) {
                 console.error("Error waiting for transaction:", waitError);

@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { IotaProvider } from '@/lib/iota';
 import Header from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
-import { WalletProvider } from '@iota/dapp-kit';
-import { networkConfig } from '@/lib/config';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'IOTA Stay',
@@ -28,13 +26,11 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
-        <WalletProvider networkConfig={networkConfig} defaultNetwork="testnet">
-          <IotaProvider>
-            <Header />
-            <div className="flex-1 flex flex-col">{children}</div>
-            <Toaster />
-          </IotaProvider>
-        </WalletProvider>
+        <Providers>
+          <Header />
+          <div className="flex-1 flex flex-col">{children}</div>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );
