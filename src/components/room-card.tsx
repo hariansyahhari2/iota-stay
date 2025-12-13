@@ -5,14 +5,13 @@ import { useIota } from '@/lib/iota';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, BedDouble, DollarSign, Edit, Image as ImageIcon, Users } from 'lucide-react';
+import { CalendarDays, BedDouble, DollarSign, Edit, Image as ImageIcon, Users, CheckCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { Dispatch, SetStateAction } from 'react';
 
 type RoomCardProps = {
   room: RoomAvailability;
@@ -90,7 +89,7 @@ export default function RoomCard({ room, onUpdateImage }: RoomCardProps) {
             </DropdownMenu>
           </div>
         )}
-        {isVisitor && (
+        {isVisitor && !isOwner && (
           <Button
             className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold"
             onClick={() => bookRoom(room.id)}
@@ -98,8 +97,11 @@ export default function RoomCard({ room, onUpdateImage }: RoomCardProps) {
             Book Now
           </Button>
         )}
-        {role === 'visitor' && isOwner && (
-            <Badge variant="destructive" className="w-full text-center justify-center">Owned by someone else</Badge>
+        {isVisitor && isOwner && (
+            <div className="w-full flex justify-center items-center text-primary font-semibold">
+              <CheckCircle className="mr-2 h-5 w-5" />
+              <span>Booked</span>
+            </div>
         )}
       </CardFooter>
     </Card>
