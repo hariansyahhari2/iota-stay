@@ -5,7 +5,7 @@ import type { RoomAvailability } from './types';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useContract } from '@/hooks/useContract';
-import { useConnectWallet, useDisconnect as useDisconnectWallet, useCurrentAccount } from '@iota/dapp-kit';
+import { useConnectWallet, useDisconnectWallet, useCurrentAccount } from '@iota/dapp-kit';
 
 // Initial dummy data for NFTs
 const initialNfts: RoomAvailability[] = [
