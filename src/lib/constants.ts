@@ -1,0 +1,2 @@
+export const OWNER_ADDRESS = 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd';
+export const VISITOR_ADDRESS = 'iota1qrp2rf29vgnl3fweym6m5aypxtq9py7ecq9j0g7n2yvhw0q4zq5szqf26p6';

@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "deluxe-1",
+      "description": "A beautiful deluxe room with a king-sized bed and a city view.",
+      "imageUrl": "https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxob3RlbCUyMHJvb218ZW58MHx8fHwxNzY1NTIxMTEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hotel room"
+    },
+    {
+      "id": "suite-1",
+      "description": "A luxurious suite with a separate living area and panoramic ocean views.",
+      "imageUrl": "https://images.unsplash.com/photo-1746730921484-897eff445c9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsdXh1cnklMjBzdWl0ZXxlbnwwfHx8fDE3NjU2NDE4NTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "luxury suite"
+    },
+    {
+      "id": "standard-1",
+      "description": "A comfortable standard room with all the essential amenities.",
+      "imageUrl": "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjByb29tfGVufDB8fHx8MTc2NTY0NDA4NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern room"
+    },
+    {
+      "id": "family-1",
+      "description": "A spacious family room with two double beds and a play area.",
+      "imageUrl": "https://images.unsplash.com/photo-1636220245011-e049b34081cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmYW1pbHklMjBob3RlbHxlbnwwfHx8fDE3NjU2NDQwODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "family hotel"
+    },
+    {
+      "id": "penthouse-1",
+      "description": "An exclusive penthouse with private terrace and jacuzzi.",
+      "imageUrl": "https://images.unsplash.com/photo-1568115286680-d203e08a8be6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZW50aG91c2V8ZW58MHx8fHwxNzY1NjQxOTE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "luxury penthouse"
+    }
+  ]
 }
