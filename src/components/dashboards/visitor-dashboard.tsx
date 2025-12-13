@@ -11,10 +11,15 @@ import { Slider } from '@/components/ui/slider';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DateRange } from 'react-day-picker';
+import { addDays } from 'date-fns';
 
 export default function VisitorDashboard() {
   const { nfts, wallet } = useIota();
-  const [date, setDate] = useState<Date | undefined>();
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 7),
+  });
   const [roomType, setRoomType] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<[number]>([500000000]);
 
@@ -47,8 +52,9 @@ export default function VisitorDashboard() {
 
   const filteredNfts = useMemo(() => {
     return availableNfts.filter(nft => {
-      const dateFilter = date
-        ? nft.date === parseInt(format(date, 'yyyyMMdd'), 10)
+      const dateFilter = date?.from
+        ? nft.date >= parseInt(format(date.from, 'yyyyMMdd'), 10) &&
+          (date.to ? nft.date <= parseInt(format(date.to, 'yyyyMMdd'), 10) : true)
         : true;
       const roomTypeFilter = roomType !== 'all' ? nft.room_type === roomType : true;
       const priceFilter = nft.price <= priceRange[0];
@@ -73,20 +79,33 @@ export default function VisitorDashboard() {
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  id="date"
                   variant={'outline'}
                   className="w-full md:w-auto justify-start text-left font-normal"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                  {date?.from ? (
+                    date.to ? (
+                      <>
+                        {format(date.from, 'LLL dd, y')} - {format(date.to, 'LLL dd, y')}
+                      </>
+                    ) : (
+                      format(date.from, 'LLL dd, y')
+                    )
+                  ) : (
+                    <span>Pick a date range</span>
+                  )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
-                  mode="single"
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
                   selected={date}
                   onSelect={setDate}
-                  disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                  initialFocus
+                  numberOfMonths={2}
+                  disabled={(d) => d < new Date(new Date().setDate(new Date().getDate() -1))}
                 />
               </PopoverContent>
             </Popover>
