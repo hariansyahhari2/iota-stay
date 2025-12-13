@@ -29,6 +29,17 @@ export default function VisitorDashboard() {
     return nfts.filter(nft => nft.owner === wallet);
   }, [nfts, wallet]);
 
+  const { upcomingBookings, pastBookings } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayNum = parseInt(format(today, 'yyyyMMdd'));
+    
+    const upcoming = myBookings.filter(booking => booking.date >= todayNum);
+    const past = myBookings.filter(booking => booking.date < todayNum);
+
+    return { upcomingBookings: upcoming, pastBookings: past };
+  }, [myBookings]);
+
   const roomTypes = useMemo(() => ['all', ...Array.from(new Set(availableNfts.map(nft => nft.room_type)))], [availableNfts]);
 
   const filteredNfts = useMemo(() => {
@@ -112,19 +123,37 @@ export default function VisitorDashboard() {
             </div>
           )}
         </TabsContent>
-        <TabsContent value="bookings" className="mt-6">
-          {myBookings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {myBookings.map(room => (
-                <RoomCard key={room.id} room={room} onUpdateImage={handleUpdateImage} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 border-2 border-dashed rounded-lg bg-card">
-              <h3 className="text-xl font-semibold">No Bookings Found</h3>
-              <p className="text-muted-foreground mt-2">You haven't booked any rooms yet.</p>
-            </div>
-          )}
+        <TabsContent value="bookings" className="mt-6 space-y-8">
+           <div>
+            <h2 className="text-2xl font-headline font-bold mb-4">Upcoming Bookings</h2>
+            {upcomingBookings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {upcomingBookings.map(room => (
+                  <RoomCard key={room.id} room={room} onUpdateImage={handleUpdateImage} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 border-2 border-dashed rounded-lg bg-card">
+                <h3 className="text-xl font-semibold">No Upcoming Bookings Found</h3>
+                <p className="text-muted-foreground mt-2">You haven't booked any rooms for the future.</p>
+              </div>
+            )}
+          </div>
+          <div>
+            <h2 className="text-2xl font-headline font-bold mb-4">Past Bookings</h2>
+            {pastBookings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {pastBookings.map(room => (
+                  <RoomCard key={room.id} room={room} onUpdateImage={handleUpdateImage} />
+                ))}
+              </div>
+            ) : (
+               <div className="text-center py-16 border-2 border-dashed rounded-lg bg-card">
+                <h3 className="text-xl font-semibold">No Past Bookings Found</h3>
+                <p className="text-muted-foreground mt-2">You don't have any past bookings.</p>
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
