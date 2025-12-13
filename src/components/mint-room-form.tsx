@@ -141,19 +141,9 @@ export default function MintRoomForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Image URL</FormLabel>
-                   <Select onValueChange={(value) => handleImageSelect(value)} defaultValue={field.value}>
-                    <FormControl>
-                       <Input placeholder="https://example.com/image.png" {...field} />
-                    </FormControl>
-                    <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Or select a placeholder image" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {PlaceHolderImagesData.placeholderImages.map(img => (
-                            <SelectItem key={img.id} value={img.imageUrl}>{img.description}</SelectItem>
-                        ))}
-                    </SelectContent>
-                   </Select>
+                  <FormControl>
+                    <Input placeholder="https://example.com/image.png" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
