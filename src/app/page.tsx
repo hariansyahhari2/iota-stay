@@ -6,9 +6,10 @@ import OwnerDashboard from '@/components/dashboards/owner-dashboard';
 import VisitorDashboard from '@/components/dashboards/visitor-dashboard';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import RoleSelector from '@/components/role-selector';
 
 export default function Home() {
-  const { wallet, role } = useIota();
+  const { wallet, role, isConnected, setRole } = useIota();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -30,8 +31,12 @@ export default function Home() {
     );
   }
 
-  if (!wallet) {
+  if (!isConnected) {
     return <ConnectWallet />;
+  }
+
+  if (!role) {
+    return <RoleSelector onSelectRole={setRole} />;
   }
 
   return (

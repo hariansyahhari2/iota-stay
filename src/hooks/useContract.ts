@@ -7,8 +7,7 @@ import {
   useSignAndExecuteTransaction,
   useIotaClientQuery,
 } from "@iota/dapp-kit"
-import { Transaction } from "@iota/sdk"
-import type { IotaObjectData, IOutputResponse } from "@iota/sdk"
+import { Transaction, IotaObjectData, IOutputResponse } from "@iota/iota-sdk"
 import { TESTNET_PACKAGE_ID } from "@/lib/config"
 import type { RoomAvailability } from "@/lib/types"
 

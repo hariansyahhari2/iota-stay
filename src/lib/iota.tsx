@@ -3,15 +3,8 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import type { RoomAvailability } from './types';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
 import { useContract } from '@/hooks/useContract';
 import { useConnectWallet, useDisconnectWallet, useCurrentAccount } from '@iota/dapp-kit';
-
-// Initial dummy data for NFTs
-const initialNfts: RoomAvailability[] = [
-  // This data is now for local display and will be superseded by contract data.
-  // We can keep it for UI development without a live contract.
-];
 
 type IotaContextType = {
   wallet: string | null;
@@ -23,6 +16,8 @@ type IotaContextType = {
   bookRoom: (nftId: string) => Promise<void>;
   updateImage: (nftId: string, newImageUrl: string, newImageHash: string) => void;
   refetchNfts: () => void;
+  isConnected: boolean;
+  setRole: (role: 'owner' | 'visitor' | null) => void;
 };
 
 const IotaContext = createContext<IotaContextType | undefined>(undefined);
@@ -31,12 +26,13 @@ export function IotaProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const { actions: contractActions, data: contractNfts, refetch, objectExists } = useContract();
   const { connect: connectWallet, isConnecting, error: connectError } = useConnectWallet();
-  const { disconnect: disconnectWallet } = useDisconnectWallet();
+  const { mutate: disconnectWallet } = useDisconnectWallet();
   const account = useCurrentAccount();
   
   const [role, setRole] = useState<'owner' | 'visitor' | null>(null);
-  const [nfts, setNfts] = useState<RoomAvailability[]>(initialNfts);
+  const [nfts, setNfts] = useState<RoomAvailability[]>([]);
 
+  const isConnected = useMemo(() => !!account, [account]);
   const wallet = useMemo(() => account?.address || null, [account]);
 
   useEffect(() => {
@@ -46,13 +42,13 @@ export function IotaProvider({ children }: { children: ReactNode }) {
   }, [connectError, toast]);
   
   useEffect(() => {
-    if (wallet) {
+    if (isConnected && role) {
       toast({
         title: 'Wallet Connected',
         description: `You are now connected as a ${role}.`,
       });
     }
-  }, [wallet, role, toast]);
+  }, [isConnected, role, toast]);
 
   useEffect(() => {
     if (contractNfts && Array.isArray(contractNfts)) {
@@ -60,16 +56,17 @@ export function IotaProvider({ children }: { children: ReactNode }) {
     }
   }, [contractNfts]);
 
-
+  // This connect function is now a placeholder, as ConnectModal handles the wallet connection.
+  // We keep the structure in case we want to add pre-connection logic later.
   const connect = useCallback(async (userRole: 'owner' | 'visitor') => {
-    setRole(userRole);
-    if (!wallet) {
+    if (!isConnected) {
       await connectWallet();
     }
-  }, [connectWallet, wallet]);
+    setRole(userRole);
+  }, [connectWallet, isConnected]);
 
   const disconnect = useCallback(async () => {
-    await disconnectWallet();
+    disconnectWallet();
     setRole(null);
     toast({ title: 'Wallet Disconnected' });
   }, [disconnectWallet, toast]);
@@ -93,7 +90,6 @@ export function IotaProvider({ children }: { children: ReactNode }) {
         title: 'Minting in Progress',
         description: 'Your room NFT is being created on the network.',
       });
-      // The hook will handle refetching and updating state
     },
     [role, wallet, contractActions, toast]
   );
@@ -126,7 +122,6 @@ export function IotaProvider({ children }: { children: ReactNode }) {
         toast({ variant: 'destructive', title: 'Error', description: 'Only owners can update images.' });
         return;
       }
-      // This part would require a contract method
       console.log('Update image called, but contract method is not implemented yet.');
       toast({ title: 'Image Updated (Locally)', description: 'This is a local update for now.' });
       setNfts((prev) =>
@@ -148,8 +143,8 @@ export function IotaProvider({ children }: { children: ReactNode }) {
   }, [refetch, objectExists]);
 
   const value = useMemo(
-    () => ({ wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts }),
-    [wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts]
+    () => ({ wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected, setRole }),
+    [wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected]
   );
 
   return <IotaContext.Provider value={value}>{children}</IotaContext.Provider>;
