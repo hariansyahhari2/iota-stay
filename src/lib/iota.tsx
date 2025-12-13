@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useMemo } from 'react
 import type { RoomAvailability } from './types';
 import { OWNER_ADDRESS, VISITOR_ADDRESS } from './constants';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 // Initial dummy data for NFTs
 const initialNfts: RoomAvailability[] = [
@@ -114,6 +115,24 @@ export function IotaProvider({ children }: { children: ReactNode }) {
         toast({ variant: 'destructive', title: 'Error', description: 'Only visitors can book rooms.' });
         return;
       }
+
+      const nftToBook = nfts.find(nft => nft.id === nftId);
+      if (!nftToBook) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Room not found.' });
+        return;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayNum = parseInt(format(today, 'yyyyMMdd'));
+
+      if (nftToBook.date < todayNum) {
+        toast({ variant: 'destructive', title: 'Booking Failed', description: 'This room is for a past date and can no longer be booked.' });
+        // Optionally, refresh the list to remove the stale NFT
+        setNfts(prev => prev.filter(nft => nft.id !== nftId));
+        return;
+      }
+      
       setNfts((prev) =>
         prev.map((nft) => {
           if (nft.id === nftId) {
@@ -127,7 +146,7 @@ export function IotaProvider({ children }: { children: ReactNode }) {
         })
       );
     },
-    [role, wallet, toast]
+    [role, wallet, toast, nfts]
   );
 
   const updateImage = useCallback(

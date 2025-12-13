@@ -22,7 +22,10 @@ export default function VisitorDashboard() {
   const handleUpdateImage = () => {};
 
   const availableNfts = useMemo(() => {
-    return nfts.filter(nft => nft.owner !== wallet);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayNum = parseInt(format(today, 'yyyyMMdd'));
+    return nfts.filter(nft => nft.owner !== wallet && nft.date >= todayNum);
   }, [nfts, wallet]);
   
   const myBookings = useMemo(() => {
@@ -82,6 +85,7 @@ export default function VisitorDashboard() {
                   mode="single"
                   selected={date}
                   onSelect={setDate}
+                  disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                   initialFocus
                 />
               </PopoverContent>
