@@ -28,11 +28,13 @@ const formSchema = z.object({
   date: z.date({ required_error: 'A date is required.' }),
   room_type: z.string().min(1, 'Room type is required.'),
   price: z.coerce.number().positive('Price must be a positive number.'),
+  capacity: z.coerce.number().int().min(1, 'Capacity must be at least 1.').max(10, 'Capacity cannot exceed 10.'),
   image_url: z.string().url('Must be a valid URL.'),
 });
 
 export default function MintRoomForm() {
   const { mintRoom } = useIota();
+  const { placeholderImages: PlaceHolderImages } = PlaceHolderImagesData;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,6 +42,7 @@ export default function MintRoomForm() {
       hotel_name: '',
       room_type: '',
       price: 100,
+      capacity: 2,
     },
   });
 
@@ -120,20 +123,36 @@ export default function MintRoomForm() {
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price (in M-IOTA)</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="e.g., 150" {...field} />
-                  </FormControl>
-                  <FormDescription>Price in MegaIOTA (1 M-IOTA = 1,000,000 IOTA).</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price (in M-IOTA)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 150" {...field} />
+                      </FormControl>
+                      <FormDescription>Price in MegaIOTA (1 M-IOTA = 1,000,000 IOTA).</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="capacity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Capacity</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 2" {...field} />
+                      </FormControl>
+                      <FormDescription>Number of guests (1-10).</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
             
             <FormField
               control={form.control}
@@ -142,7 +161,7 @@ export default function MintRoomForm() {
                 <FormItem>
                   <FormLabel>Image URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.png" {...field} />
+                    <Input placeholder="https://picsum.photos/seed/newroom/600/400" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

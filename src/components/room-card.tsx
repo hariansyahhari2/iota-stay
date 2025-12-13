@@ -5,7 +5,7 @@ import { useIota } from '@/lib/iota';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, BedDouble, DollarSign, Edit, Image as ImageIcon } from 'lucide-react';
+import { CalendarDays, BedDouble, DollarSign, Edit, Image as ImageIcon, Users } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +60,10 @@ export default function RoomCard({ room, onUpdateImage }: RoomCardProps) {
           <div className="flex items-center gap-2">
             <BedDouble className="w-4 h-4" />
             <span>{room.room_type} Room</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            <span>{room.capacity} Guest{room.capacity > 1 ? 's' : ''}</span>
           </div>
           <div className="flex items-center gap-2 font-semibold text-foreground">
             <DollarSign className="w-4 h-4 text-green-600" />

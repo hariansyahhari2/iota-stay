@@ -4,6 +4,7 @@ export interface RoomAvailability {
   date: number; // YYYYMMDD or unix day
   room_type: string; // Deluxe, Suite, etc
   price: number; // Price in smallest IOTA unit
+  capacity: number; // number of guests
   image_url: string; // IPFS / HTTPS
   image_hash: string; // SHA-256 hash as a hex string
   owner: string; // owner address
