@@ -146,6 +146,7 @@ export const useContract = () => {
   const [transactionError, setTransactionError] = useState<Error | null>(null);
   const { toast } = useToast();
   const [newlyMintedId, setNewlyMintedId] = useState<string | null>(null);
+  const [localMockNfts, setLocalMockNfts] = useState<RoomAvailability[]>([]);
 
   const {
     data: objectIdResponse,
@@ -168,14 +169,14 @@ export const useContract = () => {
 
   const contractData: RoomAvailability[] | null = useMemo(() => {
     if (!objectExists) {
-        return MOCK_ROOMS;
+        return [...MOCK_ROOMS, ...localMockNfts];
     }
     
     if (!objects?.outputs || objects.outputs.length === 0) {
-        return [];
+        return [...localMockNfts];
     }
 
-    return objects.outputs
+    const realNfts = objects.outputs
       .map((output: IOutputResponse) => {
         const iotaObjectData = output.output as unknown as IotaObjectData;
         const fields = getObjectFields(iotaObjectData);
@@ -186,7 +187,9 @@ export const useContract = () => {
         } as RoomAvailability;
       })
       .filter(Boolean) as RoomAvailability[];
-  }, [objects, objectExists]);
+      
+      return [...realNfts, ...localMockNfts];
+  }, [objects, objectExists, localMockNfts]);
 
   const mintRoom = async (
     hotel_name: string,
@@ -196,6 +199,21 @@ export const useContract = () => {
     capacity: number,
     image_url: string
   ) => {
+      // Optimistic update for demo
+    if (address) {
+      const newMockRoom: RoomAvailability = {
+        id: `0xmock${Date.now()}`,
+        hotel_name,
+        date,
+        room_type,
+        price,
+        capacity,
+        image_url,
+        owner: address,
+      };
+      setLocalMockNfts(prev => [...prev, newMockRoom]);
+    }
+
     try {
       setTransactionIsLoading(true);
       setTransactionError(null);
@@ -228,8 +246,10 @@ export const useContract = () => {
               const newObjectId = effects?.created?.[0]?.reference?.objectId;
               if (newObjectId) {
                 setNewlyMintedId(newObjectId);
+                // Replace mock with real one if needed, or just refetch
+                setLocalMockNfts(prev => prev.filter(r => !r.id.startsWith('0xmock')));
+                refetch();
               }
-              refetch();
             } catch (waitError) {
               console.error('Error waiting for transaction:', waitError);
               toast({ variant: 'destructive', title: 'Transaction Error', description: 'Could not confirm transaction on the network.' });
@@ -243,6 +263,8 @@ export const useContract = () => {
             console.error('Error:', err);
             toast({ variant: 'destructive', title: 'Minting Failed', description: error.message });
             setTransactionIsLoading(false);
+             // Remove optimistic update on failure
+            setLocalMockNfts(prev => prev.slice(0, -1));
           },
         }
       );
@@ -252,6 +274,8 @@ export const useContract = () => {
       console.error('Error minting room:', err);
       toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred while preparing the transaction.' });
       setTransactionIsLoading(false);
+      // Remove optimistic update on failure
+      setLocalMockNfts(prev => prev.slice(0, -1));
     }
   };
 
@@ -263,6 +287,8 @@ export const useContract = () => {
       
       if (room.id.startsWith('0xmock')) {
           toast({ title: 'Booking Successful! (Mock)', description: `You have successfully booked the ${room.room_type} room.` });
+          setLocalMockNfts(prev => prev.map(r => r.id === room.id && address ? { ...r, owner: address } : r));
+          setTransactionIsLoading(false);
           return;
       }
 

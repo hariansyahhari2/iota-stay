@@ -60,6 +60,16 @@ export function IotaProvider({ children }: { children: ReactNode }) {
         toast({ variant: 'destructive', title: 'Error', description: 'Only owners can mint rooms.' });
         return;
       }
+
+      // Optimistic UI update
+      const newMockRoom = {
+        ...room,
+        id: `0xmock${Date.now()}`,
+        owner: wallet,
+      };
+      setNfts(prevNfts => [...prevNfts, newMockRoom]);
+
+
       await contractActions.mintRoom(
         room.hotel_name,
         room.date,
@@ -88,6 +98,10 @@ export function IotaProvider({ children }: { children: ReactNode }) {
         return;
       }
        await contractActions.bookRoom(nftToBook);
+
+       if (nftToBook.id.startsWith('0xmock')) {
+         setNfts(prev => prev.map(n => n.id === nftId ? {...n, owner: wallet} : n));
+       }
 
        toast({
         title: 'Booking in Progress',
