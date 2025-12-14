@@ -161,7 +161,7 @@ export const useContract = () => {
           onSuccess: async ({ digest }) => {
             setHash(digest);
             try {
-              await iotaClient.awaitTransaction(digest);
+              await iotaClient.waitForTransaction({ digest });
               refetch();
             } catch (waitError) {
               console.error('Error waiting for transaction:', waitError);
@@ -204,7 +204,7 @@ export const useContract = () => {
           onSuccess: async ({ digest }) => {
             setHash(digest);
             try {
-              await iotaClient.awaitTransaction(digest);
+              await iotaClient.waitForTransaction({ digest });
               refetch();
             } catch (waitError) {
               console.error('Error waiting for transaction:', waitError);
