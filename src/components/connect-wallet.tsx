@@ -8,7 +8,6 @@ import { ConnectModal, useConnectWallet } from '@iota/dapp-kit';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ConnectWallet() {
-  const [isModalOpen, setModalOpen] = useState(false);
   const { error, connect } = useConnectWallet();
   const { toast } = useToast();
 
@@ -21,15 +20,6 @@ export default function ConnectWallet() {
       });
     }
   }, [error, toast]);
-  
-  const handleConnect = () => {
-    connect()
-      .then(() => {
-        setModalOpen(false);
-      })
-      .catch((e) => console.error(e));
-  };
-
 
   return (
     <div className="flex-1 flex items-center justify-center bg-grid-slate-50 dark:bg-grid-slate-900 p-4">
@@ -45,15 +35,11 @@ export default function ConnectWallet() {
         <CardContent className="space-y-4">
           <Button
             className="w-full h-12 text-base bg-primary hover:bg-primary/90"
-            onClick={() => setModalOpen(true)}
+            onClick={() => connect()}
           >
             Connect Wallet
           </Button>
-          <ConnectModal 
-            open={isModalOpen} 
-            onOpenChange={setModalOpen}
-            onConnect={handleConnect}
-           />
+          <ConnectModal />
         </CardContent>
       </Card>
     </div>
