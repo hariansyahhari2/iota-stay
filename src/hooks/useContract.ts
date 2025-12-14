@@ -34,7 +34,7 @@ const generateFutureDate = (daysInFuture: number) => {
     return parseInt(format(futureDate, 'yyyyMMdd'));
 }
 
-const MOCK_ROOMS: RoomAvailability[] = [
+const getMockRooms = (ownerAddress: string): RoomAvailability[] => [
     {
         id: '0xmock1',
         hotel_name: 'IOTA Grand',
@@ -43,7 +43,7 @@ const MOCK_ROOMS: RoomAvailability[] = [
         price: 250000000,
         capacity: 2,
         image_url: 'https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxob3RlbCUyMHJvb218ZW58MHx8fHwxNzY1NTIxMTEwfDA&ixlib=rb-4.1.0&q=80&w=1080',
-        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+        owner: ownerAddress,
     },
     {
         id: '0xmock2',
@@ -53,7 +53,7 @@ const MOCK_ROOMS: RoomAvailability[] = [
         price: 120000000,
         capacity: 2,
         image_url: 'https://images.unsplash.com/photo-1600210491369-e753d80a41f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjByb29tfGVufDB8fHx8MTc2NTY0NDA4NXww&ixlib=rb-4.1.0&q=80&w=1080',
-        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+        owner: ownerAddress,
     },
     {
         id: '0xmock3',
@@ -63,7 +63,7 @@ const MOCK_ROOMS: RoomAvailability[] = [
         price: 480000000,
         capacity: 4,
         image_url: 'https://images.unsplash.com/photo-1568115286680-d203e08a8be6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZW50aG91c2V8ZW58MHx8fHwxNzY1NjQxOTE0fDA&ixlib=rb-4.1.0&q=80&w=1080',
-        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+        owner: ownerAddress,
     },
     {
         id: '0xmock4',
@@ -73,7 +73,7 @@ const MOCK_ROOMS: RoomAvailability[] = [
         price: 180000000,
         capacity: 4,
         image_url: 'https://images.unsplash.com/photo-1636220245011-e049b34081cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmYW1pbHklMjBob3RlbHxlbnwwfHx8fDE3NjU2NDQwODV8MA&ixlib=rb-4.1.0&q=80&w=1080',
-        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+        owner: ownerAddress,
     }
 ];
 
@@ -169,7 +169,7 @@ export const useContract = () => {
 
   const contractData: RoomAvailability[] | null = useMemo(() => {
     if (!objectExists) {
-        return [...MOCK_ROOMS, ...localMockNfts];
+        return [...getMockRooms(address || ''), ...localMockNfts];
     }
     
     if (!objects?.outputs || objects.outputs.length === 0) {
@@ -189,7 +189,7 @@ export const useContract = () => {
       .filter(Boolean) as RoomAvailability[];
       
       return [...realNfts, ...localMockNfts];
-  }, [objects, objectExists, localMockNfts]);
+  }, [objects, objectExists, localMockNfts, address]);
 
   const mintRoom = async (
     hotel_name: string,
@@ -327,7 +327,7 @@ export const useContract = () => {
   };
 
   const contractState: ContractState = {
-    isLoading: (isFetchingObjectIds || isFetchingObjects) && objectExists,
+    isLoading: isFetchingObjectIds && !objectExists,
     isPending,
     isConfirming: isPending,
     isConfirmed: !!hash && !isPending && !transactionIsLoading,
@@ -346,4 +346,5 @@ export const useContract = () => {
   };
 };
 
+    
     
