@@ -43,6 +43,8 @@ export default function MintRoomForm() {
       room_type: '',
       price: 100,
       capacity: 2,
+      image_url: '',
+      date: new Date(),
     },
   });
 
