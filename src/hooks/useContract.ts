@@ -145,7 +145,10 @@ export const useContract = () => {
       setTransactionError(null);
       setHash(undefined);
       const tx = new Transaction();
-      
+
+      // Convert hex string to a byte array (number[])
+      const imageHashBytes = Array.from(Buffer.from(image_hash, 'hex'));
+
       tx.moveCall({
         target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
         arguments: [
@@ -155,7 +158,7 @@ export const useContract = () => {
           tx.pure.u64(price),
           tx.pure.u8(capacity),
           tx.pure.string(image_url),
-          tx.pure.hex(image_hash),
+          tx.pure.vector(imageHashBytes),
         ],
       });
 
