@@ -138,7 +138,7 @@ export const useContract = () => {
       setTransactionIsLoading(true);
       setTransactionError(null);
       setHash(undefined);
-
+      
       const tx = new Transaction();
 
       const args = [
