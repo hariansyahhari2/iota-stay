@@ -43,6 +43,10 @@ function getObjectFields(data: IotaObjectData): Omit<RoomAvailability, 'id'> | n
     data.owner && typeof data.owner === 'object' && 'AddressOwner' in data.owner
       ? String(data.owner.AddressOwner)
       : '';
+  
+  const imageHashBytes = fields.image_hash;
+  const imageHash = imageHashBytes ? Buffer.from(imageHashBytes).toString('hex') : '';
+
 
   return {
     hotel_name: fields.hotel_name,
@@ -51,7 +55,7 @@ function getObjectFields(data: IotaObjectData): Omit<RoomAvailability, 'id'> | n
     price: Number(fields.price),
     capacity: Number(fields.capacity),
     image_url: fields.image_url,
-    image_hash: fields.image_hash,
+    image_hash: imageHash,
     owner,
   };
 }
@@ -150,7 +154,7 @@ export const useContract = () => {
           { type: 'u64', value: BigInt(price) },
           { type: 'u8', value: capacity },
           { type: 'string', value: image_url },
-          { type: 'string', value: image_hash },
+          { type: 'hex', value: image_hash },
         ],
       });
 

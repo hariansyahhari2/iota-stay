@@ -32,6 +32,11 @@ const formSchema = z.object({
   image_url: z.string().url('Must be a valid URL.'),
 });
 
+// Helper to convert a string to a hex string
+function stringToHex(str: string) {
+  return Buffer.from(str, 'utf8').toString('hex');
+}
+
 export default function MintRoomForm() {
   const { mintRoom } = useIota();
   const { placeholderImages: PlaceHolderImages } = PlaceHolderImagesData;
@@ -53,7 +58,7 @@ export default function MintRoomForm() {
       ...values,
       date: parseInt(format(values.date, 'yyyyMMdd')),
       price: values.price * 1_000_000, // Convert to smallest unit
-      image_hash: 'mock_hash_' + Date.now(), // Mock hash generation
+      image_hash: stringToHex('mock_hash_' + Date.now()), // Mock hash generation as hex
     });
     form.reset();
   }
