@@ -168,12 +168,12 @@ export const useContract = () => {
   const objectExists = useMemo(() => !!objects && objects.outputs.length > 0, [objects]);
 
   const contractData: RoomAvailability[] | null = useMemo(() => {
-    if (!objectExists) {
-        return [...getMockRooms(address || ''), ...localMockNfts];
+    if (!objectExists && !isFetchingObjects && !isFetchingObjectIds) {
+      return [...getMockRooms(address || ''), ...localMockNfts];
     }
     
-    if (!objects?.outputs || objects.outputs.length === 0) {
-        return [...localMockNfts];
+    if (!objects?.outputs) {
+      return [...localMockNfts];
     }
 
     const realNfts = objects.outputs
@@ -189,7 +189,7 @@ export const useContract = () => {
       .filter(Boolean) as RoomAvailability[];
       
       return [...realNfts, ...localMockNfts];
-  }, [objects, objectExists, localMockNfts, address]);
+  }, [objects, objectExists, localMockNfts, address, isFetchingObjects, isFetchingObjectIds]);
 
   const mintRoom = async (
     hotel_name: string,
@@ -327,7 +327,7 @@ export const useContract = () => {
   };
 
   const contractState: ContractState = {
-    isLoading: isFetchingObjectIds && !objectExists,
+    isLoading: isFetchingObjectIds,
     isPending,
     isConfirming: isPending,
     isConfirmed: !!hash && !isPending && !transactionIsLoading,
@@ -345,6 +345,3 @@ export const useContract = () => {
     clearNewlyMintedId,
   };
 };
-
-    
-    
