@@ -25,7 +25,53 @@ export const CONTRACT_METHODS = {
   BOOK_ROOM: 'book_room',
 } as const;
 
-// = a==========================================================================
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+const MOCK_ROOMS: RoomAvailability[] = [
+    {
+        id: '0xmock1',
+        hotel_name: 'IOTA Grand',
+        date: 20240815,
+        room_type: 'Deluxe Suite',
+        price: 250000000,
+        capacity: 2,
+        image_url: 'https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxob3RlbCUyMHJvb218ZW58MHx8fHwxNzY1NTIxMTEwfDA&ixlib=rb-4.1.0&q=80&w=1080',
+        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+    },
+    {
+        id: '0xmock2',
+        hotel_name: 'Tangle Tower',
+        date: 20240816,
+        room_type: 'Standard King',
+        price: 120000000,
+        capacity: 2,
+        image_url: 'https://images.unsplash.com/photo-1600210491369-e753d80a41f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjByb29tfGVufDB8fHx8MTc2NTY0NDA4NXww&ixlib=rb-4.1.0&q=80&w=1080',
+        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+    },
+    {
+        id: '0xmock3',
+        hotel_name: 'Shimmer Resort',
+        date: 20240817,
+        room_type: 'Ocean View Penthouse',
+        price: 480000000,
+        capacity: 4,
+        image_url: 'https://images.unsplash.com/photo-1568115286680-d203e08a8be6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZW50aG91c2V8ZW58MHx8fHwxNzY1NjQxOTE0fDA&ixlib=rb-4.1.0&q=80&w=1080',
+        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+    },
+    {
+        id: '0xmock4',
+        hotel_name: 'IOTA Grand',
+        date: 20240820,
+        room_type: 'Family Room',
+        price: 180000000,
+        capacity: 4,
+        image_url: 'https://images.unsplash.com/photo-1636220245011-e049b34081cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmYW1pbHklMjBob3RlbHxlbnwwfHx8fDE3NjU2NDQwODV8MA&ixlib=rb-4.1.0&q=80&w=1080',
+        owner: 'iota1qwns3heyrj0rzvaye3t9vtw9cw28chrjwsdldz90l9s0apv22s5t5yvjeyd',
+    }
+];
+
+// ============================================================================
 // DATA EXTRACTION
 // ============================================================================
 
@@ -113,7 +159,9 @@ export const useContract = () => {
   });
 
   const contractData: RoomAvailability[] | null = useMemo(() => {
-    if (!objects?.outputs) return [];
+    if (!objects?.outputs || objects.outputs.length === 0) {
+      return MOCK_ROOMS;
+    }
 
     return objects.outputs
       .map((output: IOutputResponse) => {
@@ -128,7 +176,7 @@ export const useContract = () => {
       .filter(Boolean) as RoomAvailability[];
   }, [objects]);
 
-  const objectExists = useMemo(() => contractData && contractData.length > 0, [contractData]);
+  const objectExists = useMemo(() => contractData && contractData.some(room => !room.id.startsWith('0xmock')), [contractData]);
 
   const mintRoom = async (
     hotel_name: string,
@@ -136,7 +184,7 @@ export const useContract = () => {
     room_type: string,
     price: number,
     capacity: number,
-    image_url: string,
+    image_url: string
   ) => {
     try {
       setTransactionIsLoading(true);
@@ -203,6 +251,11 @@ export const useContract = () => {
       setTransactionError(null);
       setHash(undefined);
       
+      if (room.id.startsWith('0xmock')) {
+          toast({ title: 'Booking Successful! (Mock)', description: `You have successfully booked the ${room.room_type} room.` });
+          return;
+      }
+
       const tx = new Transaction();
       
       tx.moveCall({
