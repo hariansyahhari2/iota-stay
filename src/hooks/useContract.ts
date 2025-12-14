@@ -199,21 +199,6 @@ export const useContract = () => {
     capacity: number,
     image_url: string
   ) => {
-      // Optimistic update for demo
-    if (address) {
-      const newMockRoom: RoomAvailability = {
-        id: `0xmock${Date.now()}`,
-        hotel_name,
-        date,
-        room_type,
-        price,
-        capacity,
-        image_url,
-        owner: address,
-      };
-      setLocalMockNfts(prev => [...prev, newMockRoom]);
-    }
-
     try {
       setTransactionIsLoading(true);
       setTransactionError(null);
@@ -246,8 +231,6 @@ export const useContract = () => {
               const newObjectId = effects?.created?.[0]?.reference?.objectId;
               if (newObjectId) {
                 setNewlyMintedId(newObjectId);
-                // Replace mock with real one if needed, or just refetch
-                setLocalMockNfts(prev => prev.filter(r => !r.id.startsWith('0xmock')));
                 refetch();
               }
             } catch (waitError) {
@@ -263,8 +246,6 @@ export const useContract = () => {
             console.error('Error:', err);
             toast({ variant: 'destructive', title: 'Minting Failed', description: error.message });
             setTransactionIsLoading(false);
-             // Remove optimistic update on failure
-            setLocalMockNfts(prev => prev.slice(0, -1));
           },
         }
       );
@@ -274,8 +255,6 @@ export const useContract = () => {
       console.error('Error minting room:', err);
       toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred while preparing the transaction.' });
       setTransactionIsLoading(false);
-      // Remove optimistic update on failure
-      setLocalMockNfts(prev => prev.slice(0, -1));
     }
   };
 
@@ -348,7 +327,7 @@ export const useContract = () => {
   };
 
   const contractState: ContractState = {
-    isLoading: transactionIsLoading || isPending || isFetchingObjectIds || isFetchingObjects,
+    isLoading: (isFetchingObjectIds || isFetchingObjects) && objectExists,
     isPending,
     isConfirming: isPending,
     isConfirmed: !!hash && !isPending && !transactionIsLoading,
@@ -366,3 +345,5 @@ export const useContract = () => {
     clearNewlyMintedId,
   };
 };
+
+    
