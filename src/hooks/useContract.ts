@@ -144,6 +144,7 @@ export const useContract = () => {
       setTransactionIsLoading(true);
       setTransactionError(null);
       setHash(undefined);
+
       const tx = new Transaction();
 
       tx.moveCall({
@@ -155,7 +156,7 @@ export const useContract = () => {
           tx.pure.u64(price),
           tx.pure.u8(capacity),
           tx.pure.string(image_url),
-          tx.pure.address(`0x${image_hash}`), // Use tx.pure.address for vector<u8> from hex
+          tx.pure.vector(Buffer.from(image_hash, 'hex')),
         ],
       });
 
