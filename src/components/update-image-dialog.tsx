@@ -33,7 +33,7 @@ export default function UpdateImageDialog({ room, isOpen, setIsOpen }: UpdateIma
       toast({ variant: 'destructive', title: 'Error', description: 'Image URL cannot be empty.' });
       return;
     }
-    updateImage(room.id, newImageUrl, 'mock_hash_' + Date.now());
+    updateImage(room.id, newImageUrl);
     setIsOpen(false);
   };
 

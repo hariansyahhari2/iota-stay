@@ -44,9 +44,6 @@ function getObjectFields(data: IotaObjectData): Omit<RoomAvailability, 'id'> | n
       ? String(data.owner.AddressOwner)
       : '';
   
-  const imageHashBytes = fields.image_hash;
-  const imageHash = imageHashBytes ? Buffer.from(imageHashBytes).toString('hex') : '';
-
 
   return {
     hotel_name: fields.hotel_name,
@@ -55,7 +52,6 @@ function getObjectFields(data: IotaObjectData): Omit<RoomAvailability, 'id'> | n
     price: Number(fields.price),
     capacity: Number(fields.capacity),
     image_url: fields.image_url,
-    image_hash: imageHash,
     owner,
   };
 }
@@ -80,8 +76,7 @@ export interface ContractActions {
     room_type: string,
     price: number,
     capacity: number,
-    image_url: string,
-    image_hash: string
+    image_url: string
   ) => Promise<void>;
   bookRoom: (room: RoomAvailability) => Promise<void>;
   clearObject: () => void;
@@ -137,8 +132,7 @@ export const useContract = () => {
     room_type: string,
     price: number,
     capacity: number,
-    image_url: string,
-    image_hash: string
+    image_url: string
   ) => {
     try {
       setTransactionIsLoading(true);
@@ -147,19 +141,16 @@ export const useContract = () => {
 
       const tx = new Transaction();
 
-      const args = [
-        tx.pure.string(hotel_name),
-        tx.pure.u64(BigInt(date)),
-        tx.pure.string(room_type),
-        tx.pure.u64(BigInt(price)),
-        tx.pure.u8(capacity),
-        tx.pure.string(image_url),
-        tx.pure.address(`0x${image_hash}`),
-      ];
-
       tx.moveCall({
         target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
-        arguments: args,
+        arguments: [
+          tx.pure.string(hotel_name),
+          tx.pure.u64(date),
+          tx.pure.string(room_type),
+          tx.pure.u64(price),
+          tx.pure.u8(capacity),
+          tx.pure.string(image_url),
+        ],
       });
 
       signAndExecute(
@@ -200,11 +191,9 @@ export const useContract = () => {
       
       const tx = new Transaction();
       
-      const args = [tx.pure.object(room.id)];
-
       tx.moveCall({
         target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.BOOK_ROOM}`,
-        arguments: args,
+        arguments: [tx.pure.object(room.id)],
       });
 
       signAndExecute(

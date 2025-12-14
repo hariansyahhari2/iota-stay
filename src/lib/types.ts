@@ -6,6 +6,5 @@ export interface RoomAvailability {
   price: number; // Price in smallest IOTA unit
   capacity: number; // number of guests
   image_url: string; // IPFS / HTTPS
-  image_hash: string; // SHA-256 hash as a hex string
   owner: string; // owner address
 }

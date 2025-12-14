@@ -13,7 +13,7 @@ type IotaContextType = {
   disconnect: () => void;
   mintRoom: (room: Omit<RoomAvailability, 'id' | 'owner'>) => Promise<void>;
   bookRoom: (nftId: string) => Promise<void>;
-  updateImage: (nftId: string, newImageUrl: string, newImageHash: string) => void;
+  updateImage: (nftId: string, newImageUrl: string) => void;
   refetchNfts: () => void;
   isConnected: boolean;
   setRole: (role: 'owner' | 'visitor' | null) => void;
@@ -66,8 +66,7 @@ export function IotaProvider({ children }: { children: ReactNode }) {
         room.room_type,
         room.price,
         room.capacity,
-        room.image_url,
-        room.image_hash
+        room.image_url
       );
       toast({
         title: 'Minting in Progress',
@@ -100,7 +99,7 @@ export function IotaProvider({ children }: { children: ReactNode }) {
   );
 
   const updateImage = useCallback(
-    (nftId: string, newImageUrl: string, newImageHash: string) => {
+    (nftId: string, newImageUrl: string) => {
       if (role !== 'owner' || !wallet) {
         toast({ variant: 'destructive', title: 'Error', description: 'Only owners can update images.' });
         return;
@@ -110,7 +109,7 @@ export function IotaProvider({ children }: { children: ReactNode }) {
       setNfts((prev) =>
         prev.map((nft) => {
           if (nft.id === nftId && nft.owner === wallet) {
-            return { ...nft, image_url: newImageUrl, image_hash: newImageHash };
+            return { ...nft, image_url: newImageUrl };
           }
           return nft;
         })
