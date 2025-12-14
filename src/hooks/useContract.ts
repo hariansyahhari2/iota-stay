@@ -12,7 +12,7 @@ import type { IotaObjectData, IOutputResponse } from '@iota/iota-sdk/client';
 import { TESTNET_PACKAGE_ID } from '@/lib/config';
 import type { RoomAvailability } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { transfer } from 'node:worker_threads';
+import { addDays, format } from 'date-fns';
 
 // ============================================================================
 // CONTRACT CONFIGURATION
@@ -28,11 +28,17 @@ export const CONTRACT_METHODS = {
 // ============================================================================
 // MOCK DATA
 // ============================================================================
+
+const generateFutureDate = (daysInFuture: number) => {
+    const futureDate = addDays(new Date(), daysInFuture);
+    return parseInt(format(futureDate, 'yyyyMMdd'));
+}
+
 const MOCK_ROOMS: RoomAvailability[] = [
     {
         id: '0xmock1',
         hotel_name: 'IOTA Grand',
-        date: 20240815,
+        date: generateFutureDate(3),
         room_type: 'Deluxe Suite',
         price: 250000000,
         capacity: 2,
@@ -42,7 +48,7 @@ const MOCK_ROOMS: RoomAvailability[] = [
     {
         id: '0xmock2',
         hotel_name: 'Tangle Tower',
-        date: 20240816,
+        date: generateFutureDate(5),
         room_type: 'Standard King',
         price: 120000000,
         capacity: 2,
@@ -52,7 +58,7 @@ const MOCK_ROOMS: RoomAvailability[] = [
     {
         id: '0xmock3',
         hotel_name: 'Shimmer Resort',
-        date: 20240817,
+        date: generateFutureDate(7),
         room_type: 'Ocean View Penthouse',
         price: 480000000,
         capacity: 4,
@@ -62,7 +68,7 @@ const MOCK_ROOMS: RoomAvailability[] = [
     {
         id: '0xmock4',
         hotel_name: 'IOTA Grand',
-        date: 20240820,
+        date: generateFutureDate(10),
         room_type: 'Family Room',
         price: 180000000,
         capacity: 4,
@@ -158,9 +164,15 @@ export const useContract = () => {
     enabled: objectIds.length > 0,
   });
 
+  const objectExists = useMemo(() => !!objects && objects.outputs.length > 0, [objects]);
+
   const contractData: RoomAvailability[] | null = useMemo(() => {
+    if (!objectExists) {
+        return MOCK_ROOMS;
+    }
+    
     if (!objects?.outputs || objects.outputs.length === 0) {
-      return MOCK_ROOMS;
+        return [];
     }
 
     return objects.outputs
@@ -174,9 +186,7 @@ export const useContract = () => {
         } as RoomAvailability;
       })
       .filter(Boolean) as RoomAvailability[];
-  }, [objects]);
-
-  const objectExists = useMemo(() => contractData && contractData.some(room => !room.id.startsWith('0xmock')), [contractData]);
+  }, [objects, objectExists]);
 
   const mintRoom = async (
     hotel_name: string,
