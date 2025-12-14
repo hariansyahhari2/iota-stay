@@ -11,6 +11,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import type { IotaObjectData, IOutputResponse } from '@iota/iota-sdk/client';
 import { TESTNET_PACKAGE_ID } from '@/lib/config';
 import type { RoomAvailability } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 // ============================================================================
 // CONTRACT CONFIGURATION
@@ -90,6 +91,7 @@ export const useContract = () => {
   const [transactionIsLoading, setTransactionIsLoading] = useState(false);
   const [hash, setHash] = useState<string | undefined>();
   const [transactionError, setTransactionError] = useState<Error | null>(null);
+  const { toast } = useToast();
 
   const {
     data: objectIdResponse,
@@ -132,7 +134,7 @@ export const useContract = () => {
     room_type: string,
     price: number,
     capacity: number,
-    image_url: string
+    image_url: string,
   ) => {
     try {
       setTransactionIsLoading(true);
@@ -161,7 +163,17 @@ export const useContract = () => {
           onSuccess: async ({ digest }) => {
             setHash(digest);
             try {
-              await iotaClient.waitForTransaction({ digest });
+              const { effects } = await iotaClient.waitForTransaction({
+                digest,
+                options: { showEffects: true },
+              });
+              const newObjectId = effects?.created?.[0]?.reference?.objectId;
+              if (newObjectId) {
+                toast({
+                  title: 'Minting Successful!',
+                  description: `New Room NFT created with ID: ${newObjectId.substring(0, 10)}...`,
+                });
+              }
               refetch();
             } catch (waitError) {
               console.error('Error waiting for transaction:', waitError);
