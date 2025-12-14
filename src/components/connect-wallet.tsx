@@ -1,13 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wallet } from 'lucide-react';
-import { ConnectModal } from '@iota/dapp-kit';
+import { ConnectModal, useConnectWallet } from '@iota/dapp-kit';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ConnectWallet() {
   const [isModalOpen, setModalOpen] = useState(false);
+  const { error, connect } = useConnectWallet();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Connection Failed',
+        description: error.message,
+      });
+    }
+  }, [error, toast]);
+  
+  const handleConnect = () => {
+    connect()
+      .then(() => {
+        setModalOpen(false);
+      })
+      .catch((e) => console.error(e));
+  };
+
 
   return (
     <div className="flex-1 flex items-center justify-center bg-grid-slate-50 dark:bg-grid-slate-900 p-4">
@@ -27,7 +49,11 @@ export default function ConnectWallet() {
           >
             Connect Wallet
           </Button>
-          <ConnectModal open={isModalOpen} onOpenChange={setModalOpen} />
+          <ConnectModal 
+            open={isModalOpen} 
+            onOpenChange={setModalOpen}
+            onConnect={handleConnect}
+           />
         </CardContent>
       </Card>
     </div>

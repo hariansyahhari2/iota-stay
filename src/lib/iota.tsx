@@ -4,13 +4,12 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect } 
 import type { RoomAvailability } from './types';
 import { useToast } from '@/hooks/use-toast';
 import { useContract } from '@/hooks/useContract';
-import { useConnectWallet, useDisconnectWallet, useCurrentAccount } from '@iota/dapp-kit';
+import { useDisconnectWallet, useCurrentAccount } from '@iota/dapp-kit';
 
 type IotaContextType = {
   wallet: string | null;
   role: 'owner' | 'visitor' | null;
   nfts: RoomAvailability[];
-  connect: () => void;
   disconnect: () => void;
   mintRoom: (room: Omit<RoomAvailability, 'id' | 'owner'>) => Promise<void>;
   bookRoom: (nftId: string) => Promise<void>;
@@ -25,7 +24,6 @@ const IotaContext = createContext<IotaContextType | undefined>(undefined);
 export function IotaProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const { actions: contractActions, data: contractNfts, refetch, objectExists } = useContract();
-  const { connect, isConnecting, error: connectError } = useConnectWallet();
   const { mutate: disconnectWallet } = useDisconnectWallet();
   const account = useCurrentAccount();
   
@@ -34,12 +32,6 @@ export function IotaProvider({ children }: { children: ReactNode }) {
 
   const isConnected = useMemo(() => !!account, [account]);
   const wallet = useMemo(() => account?.address || null, [account]);
-
-  useEffect(() => {
-    if (connectError) {
-      toast({ variant: 'destructive', title: 'Connection Failed', description: connectError.message });
-    }
-  }, [connectError, toast]);
   
   useEffect(() => {
     if (isConnected && role) {
@@ -134,8 +126,8 @@ export function IotaProvider({ children }: { children: ReactNode }) {
   }, [refetch, objectExists]);
 
   const value = useMemo(
-    () => ({ wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected, setRole }),
-    [wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected, setRole]
+    () => ({ wallet, role, nfts, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected, setRole }),
+    [wallet, role, nfts, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected, setRole]
   );
 
   return <IotaContext.Provider value={value}>{children}</IotaContext.Provider>;
