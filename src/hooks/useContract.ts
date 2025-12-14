@@ -145,16 +145,17 @@ export const useContract = () => {
       setTransactionError(null);
       setHash(undefined);
       const tx = new Transaction();
+      
       tx.moveCall({
-        function: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
+        target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
         arguments: [
-          { type: 'string', value: hotel_name },
-          { type: 'u64', value: BigInt(date) },
-          { type: 'string', value: room_type },
-          { type: 'u64', value: BigInt(price) },
-          { type: 'u8', value: capacity },
-          { type: 'string', value: image_url },
-          { type: 'hex', value: image_hash },
+          tx.pure.string(hotel_name),
+          tx.pure.u64(BigInt(date)),
+          tx.pure.string(room_type),
+          tx.pure.u64(BigInt(price)),
+          tx.pure.u8(capacity),
+          tx.pure.string(image_url),
+          tx.pure.vector(Buffer.from(image_hash, 'hex')),
         ],
       });
 
@@ -195,8 +196,8 @@ export const useContract = () => {
       setHash(undefined);
       const tx = new Transaction();
       tx.moveCall({
-        function: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.BOOK_ROOM}`,
-        arguments: [{ type: 'object', value: room.id }],
+        target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.BOOK_ROOM}`,
+        arguments: [tx.pure.object(room.id)],
       });
 
       signAndExecute(
