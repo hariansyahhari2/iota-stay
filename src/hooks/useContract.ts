@@ -155,7 +155,7 @@ export const useContract = () => {
           tx.pure.u64(price),
           tx.pure.u8(capacity),
           tx.pure.string(image_url),
-          `0x${image_hash}`, // Pass hex string with 0x prefix for vector<u8>
+          tx.pure.address(`0x${image_hash}`), // Use tx.pure.address for vector<u8> from hex
         ],
       });
 
