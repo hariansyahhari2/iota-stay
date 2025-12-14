@@ -16,14 +16,14 @@ import { addDays } from 'date-fns';
 import { useContract } from '@/hooks/useContract';
 
 export default function VisitorDashboard() {
-  const { nfts: contextNfts, wallet, refetchNfts } = useIota();
+  const { wallet, refetchNfts } = useIota();
   const { data: contractNfts, state } = useContract();
 
   useEffect(() => {
     refetchNfts();
   }, [refetchNfts]);
   
-  const nfts = contractNfts || contextNfts;
+  const nfts = contractNfts;
 
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),

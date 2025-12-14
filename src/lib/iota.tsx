@@ -10,7 +10,7 @@ type IotaContextType = {
   wallet: string | null;
   role: 'owner' | 'visitor' | null;
   nfts: RoomAvailability[];
-  connect: (role: 'owner' | 'visitor') => void;
+  connect: () => void;
   disconnect: () => void;
   mintRoom: (room: Omit<RoomAvailability, 'id' | 'owner'>) => Promise<void>;
   bookRoom: (nftId: string) => Promise<void>;
@@ -25,7 +25,7 @@ const IotaContext = createContext<IotaContextType | undefined>(undefined);
 export function IotaProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const { actions: contractActions, data: contractNfts, refetch, objectExists } = useContract();
-  const { connect: connectWallet, isConnecting, error: connectError } = useConnectWallet();
+  const { connect, isConnecting, error: connectError } = useConnectWallet();
   const { mutate: disconnectWallet } = useDisconnectWallet();
   const account = useCurrentAccount();
   
@@ -55,15 +55,6 @@ export function IotaProvider({ children }: { children: ReactNode }) {
       setNfts(contractNfts);
     }
   }, [contractNfts]);
-
-  // This connect function is now a placeholder, as ConnectModal handles the wallet connection.
-  // We keep the structure in case we want to add pre-connection logic later.
-  const connect = useCallback(async (userRole: 'owner' | 'visitor') => {
-    if (!isConnected) {
-      await connectWallet();
-    }
-    setRole(userRole);
-  }, [connectWallet, isConnected]);
 
   const disconnect = useCallback(async () => {
     disconnectWallet();
@@ -144,7 +135,7 @@ export function IotaProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({ wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected, setRole }),
-    [wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected]
+    [wallet, role, nfts, connect, disconnect, mintRoom, bookRoom, updateImage, refetchNfts, isConnected, setRole]
   );
 
   return <IotaContext.Provider value={value}>{children}</IotaContext.Provider>;

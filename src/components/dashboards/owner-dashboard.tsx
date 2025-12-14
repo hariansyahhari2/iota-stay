@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useContract } from '@/hooks/useContract';
 
 export default function OwnerDashboard() {
-  const { nfts: contextNfts, wallet, refetchNfts } = useIota();
+  const { wallet, refetchNfts } = useIota();
   const { data: contractNfts, state } = useContract();
   const [selectedRoom, setSelectedRoom] = useState<RoomAvailability | null>(null);
 
@@ -17,7 +17,7 @@ export default function OwnerDashboard() {
     refetchNfts();
   }, [refetchNfts]);
   
-  const nfts = contractNfts || contextNfts;
+  const nfts = contractNfts;
 
   const myNfts = useMemo(() => {
     if (!wallet || !nfts) return [];
