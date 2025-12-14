@@ -23,7 +23,7 @@ export const CONTRACT_METHODS = {
   BOOK_ROOM: 'book_room',
 } as const;
 
-// ============================================================================
+// = a==========================================================================
 // DATA EXTRACTION
 // ============================================================================
 
@@ -141,16 +141,18 @@ export const useContract = () => {
 
       const tx = new Transaction();
 
+      const args = [
+        tx.pure.string(hotel_name),
+        tx.pure.u64(date),
+        tx.pure.string(room_type),
+        tx.pure.u64(price),
+        tx.pure.u8(capacity),
+        tx.pure.string(image_url),
+      ];
+
       tx.moveCall({
         target: `${PACKAGE_ID}::${CONTRACT_MODULE}::${CONTRACT_METHODS.MINT_ROOM}`,
-        arguments: [
-          tx.pure.string(hotel_name),
-          tx.pure.u64(date),
-          tx.pure.string(room_type),
-          tx.pure.u64(price),
-          tx.pure.u8(capacity),
-          tx.pure.string(image_url),
-        ],
+        arguments: args,
       });
 
       signAndExecute(
