@@ -33,9 +33,9 @@ The current Testnet Package ID for the smart contract is:
 **`0x0bd789e4392dd4e8829b6cb317356e695a4954e57bdc78c834e6d5b28722a695`**
 
 ### Contract on IOTASCAN
-You can view the deployed package on the IOTASCAN Testnet Explorer:
+You can view the deployed package on the IOTASCAN Testnet Explorer. The image below shows the contract details on the explorer.
 
-[https://iotascan.com/testnet/object/0x0bd789e4392dd4e8829b6cb317356e695a4954e57bdc78c834e6d5b28722a695/contracts](https://iotascan.com/testnet/object/0x0bd789e4392dd4e8829b6cb317356e695a4954e57bdc78c834e6d5b28722a695/contracts)
+[![Contract on IOTASCAN](public/images/contract-capture.png)](https://iotascan.com/testnet/object/0x0bd789e4392dd4e8829b6cb317356e695a4954e57bdc78c834e6d5b28722a695/contracts)
 
 ### Core Functions
 
