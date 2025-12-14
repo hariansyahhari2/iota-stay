@@ -32,6 +32,11 @@ The application is powered by a Move smart contract deployed on the IOTA testnet
 The current Testnet Package ID for the smart contract is:
 **`0x0bd789e4392dd4e8829b6cb317356e695a4954e57bdc78c834e6d5b28722a695`**
 
+### Contract on IOTASCAN
+You can view the deployed package on the IOTASCAN Testnet Explorer:
+
+[](https://explorer.iota.org/testnet/package/0x0bd789e4392dd4e8829b6cb317356e695a4954e57bdc78c834e6d5b28722a695)
+
 ### Core Functions
 
 - **`mint_room`**:
