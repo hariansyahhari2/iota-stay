@@ -7,10 +7,11 @@ import UpdateImageDialog from '@/components/update-image-dialog';
 import type { RoomAvailability } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useContract } from '@/hooks/useContract';
+import MintSuccessDialog from '../mint-success-dialog';
 
 export default function OwnerDashboard() {
   const { wallet, refetchNfts } = useIota();
-  const { data: contractNfts, state } = useContract();
+  const { data: contractNfts, state, newlyMintedId, clearNewlyMintedId } = useContract();
   const [selectedRoom, setSelectedRoom] = useState<RoomAvailability | null>(null);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function OwnerDashboard() {
           }}
         />
       )}
+       <MintSuccessDialog objectId={newlyMintedId} onClose={clearNewlyMintedId} />
     </div>
   );
 }

@@ -92,6 +92,7 @@ export const useContract = () => {
   const [hash, setHash] = useState<string | undefined>();
   const [transactionError, setTransactionError] = useState<Error | null>(null);
   const { toast } = useToast();
+  const [newlyMintedId, setNewlyMintedId] = useState<string | null>(null);
 
   const {
     data: objectIdResponse,
@@ -169,14 +170,12 @@ export const useContract = () => {
               });
               const newObjectId = effects?.created?.[0]?.reference?.objectId;
               if (newObjectId) {
-                toast({
-                  title: 'Minting Successful!',
-                  description: `New Room NFT created with ID: ${newObjectId.substring(0, 10)}...`,
-                });
+                setNewlyMintedId(newObjectId);
               }
               refetch();
             } catch (waitError) {
               console.error('Error waiting for transaction:', waitError);
+              toast({ variant: 'destructive', title: 'Transaction Error', description: 'Could not confirm transaction on the network.' });
             } finally {
               setTransactionIsLoading(false);
             }
@@ -185,6 +184,7 @@ export const useContract = () => {
             const error = err instanceof Error ? err : new Error(String(err));
             setTransactionError(error);
             console.error('Error:', err);
+            toast({ variant: 'destructive', title: 'Minting Failed', description: error.message });
             setTransactionIsLoading(false);
           },
         }
@@ -193,6 +193,7 @@ export const useContract = () => {
       const error = err instanceof Error ? err : new Error(String(err));
       setTransactionError(error);
       console.error('Error minting room:', err);
+      toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred while preparing the transaction.' });
       setTransactionIsLoading(false);
     }
   };
@@ -217,9 +218,11 @@ export const useContract = () => {
             setHash(digest);
             try {
               await iotaClient.waitForTransaction({ digest });
+              toast({ title: 'Booking Successful!', description: `You have successfully booked the ${room.room_type} room.` });
               refetch();
             } catch (waitError) {
               console.error('Error waiting for transaction:', waitError);
+               toast({ variant: 'destructive', title: 'Transaction Error', description: 'Could not confirm transaction on the network.' });
             }
             setTransactionIsLoading(false);
           },
@@ -227,6 +230,7 @@ export const useContract = () => {
             const error = err instanceof Error ? err : new Error(String(err));
             setTransactionError(error);
             console.error('Error:', err);
+            toast({ variant: 'destructive', title: 'Booking Failed', description: error.message });
             setTransactionIsLoading(false);
           },
         }
@@ -235,6 +239,7 @@ export const useContract = () => {
       const error = err instanceof Error ? err : new Error(String(err));
       setTransactionError(error);
       console.error('Error booking room:', err);
+      toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred while preparing the transaction.' });
       setTransactionIsLoading(false);
     }
   };
@@ -243,6 +248,10 @@ export const useContract = () => {
     // This function might need rethinking in a multi-object world
     setTransactionError(null);
   };
+
+  const clearNewlyMintedId = () => {
+    setNewlyMintedId(null);
+  }
 
   const actions: ContractActions = {
     mintRoom,
@@ -265,5 +274,7 @@ export const useContract = () => {
     state: contractState,
     objectExists,
     refetch,
+    newlyMintedId,
+    clearNewlyMintedId,
   };
 };
